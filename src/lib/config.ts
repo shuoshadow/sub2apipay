@@ -56,8 +56,8 @@ const envSchema = z.object({
   ADMIN_TOKEN: z.string().min(1),
 
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  NEXT_PUBLIC_PAY_HELP_IMAGE_URL: optionalTrimmedString,
-  NEXT_PUBLIC_PAY_HELP_TEXT: optionalTrimmedString,
+  PAY_HELP_IMAGE_URL: optionalTrimmedString,
+  PAY_HELP_TEXT: optionalTrimmedString,
 });
 
 export type Env = z.infer<typeof envSchema>;

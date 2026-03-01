@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
         maxAmount: env.MAX_RECHARGE_AMOUNT,
         maxDailyAmount: env.MAX_DAILY_RECHARGE_AMOUNT,
         methodLimits,
+        helpImageUrl: env.PAY_HELP_IMAGE_URL ?? null,
+        helpText: env.PAY_HELP_TEXT ?? null,
       },
     });
   } catch (error) {

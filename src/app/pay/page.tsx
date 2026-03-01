@@ -27,6 +27,8 @@ interface AppConfig {
   maxAmount: number;
   maxDailyAmount: number;
   methodLimits?: Record<string, MethodLimitInfo>;
+  helpImageUrl?: string | null;
+  helpText?: string | null;
 }
 
 function PayContent() {
@@ -64,8 +66,8 @@ function PayContent() {
   const effectiveUserId = resolvedUserId || userId;
   const isEmbedded = uiMode === 'embedded' && isIframeContext;
   const hasToken = token.length > 0;
-  const helpImageUrl = (process.env.NEXT_PUBLIC_PAY_HELP_IMAGE_URL || '').trim();
-  const helpText = (process.env.NEXT_PUBLIC_PAY_HELP_TEXT || '').trim();
+  const helpImageUrl = (config.helpImageUrl || '').trim();
+  const helpText = (config.helpText || '').trim();
   const hasHelpContent = Boolean(helpImageUrl || helpText);
 
   useEffect(() => {
@@ -100,6 +102,8 @@ function PayContent() {
             maxAmount: cfgData.config.maxAmount ?? 1000,
             maxDailyAmount: cfgData.config.maxDailyAmount ?? 0,
             methodLimits: cfgData.config.methodLimits,
+            helpImageUrl: cfgData.config.helpImageUrl ?? null,
+            helpText: cfgData.config.helpText ?? null,
           });
         }
       } else if (cfgRes.status === 404) {
