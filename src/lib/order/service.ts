@@ -44,6 +44,29 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     throw new OrderError('TOO_MANY_PENDING', `Too many pending orders (${MAX_PENDING_ORDERS})`, 429);
   }
 
+  // 每日累计充值限额校验（0 = 不限制）
+  if (env.MAX_DAILY_RECHARGE_AMOUNT > 0) {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    const dailyAgg = await prisma.order.aggregate({
+      where: {
+        userId: input.userId,
+        status: { in: ['PAID', 'RECHARGING', 'COMPLETED'] },
+        paidAt: { gte: todayStart },
+      },
+      _sum: { amount: true },
+    });
+    const alreadyPaid = Number(dailyAgg._sum.amount ?? 0);
+    if (alreadyPaid + input.amount > env.MAX_DAILY_RECHARGE_AMOUNT) {
+      const remaining = Math.max(0, env.MAX_DAILY_RECHARGE_AMOUNT - alreadyPaid);
+      throw new OrderError(
+        'DAILY_LIMIT_EXCEEDED',
+        `今日累计充值已达上限，剩余可充值 ${remaining.toFixed(2)} 元`,
+        429,
+      );
+    }
+  }
+
   const expiresAt = new Date(Date.now() + env.ORDER_TIMEOUT_MINUTES * 60 * 1000);
   const order = await prisma.order.create({
     data: {

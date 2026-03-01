@@ -24,6 +24,7 @@ interface AppConfig {
   enabledPaymentTypes: string[];
   minAmount: number;
   maxAmount: number;
+  maxDailyAmount: number;
 }
 
 function PayContent() {
@@ -51,6 +52,7 @@ function PayContent() {
     enabledPaymentTypes: ['alipay', 'wxpay', 'stripe'],
     minAmount: 1,
     maxAmount: 10000,
+    maxDailyAmount: 0,
   });
 
   const effectiveUserId = resolvedUserId || userId;
@@ -178,6 +180,7 @@ function PayContent() {
           USER_INACTIVE: '账户已被禁用，无法充值，请联系管理员',
           TOO_MANY_PENDING: '您有过多待支付订单，请先完成或取消现有订单后再试',
           USER_NOT_FOUND: '用户不存在，请检查链接是否正确',
+          DAILY_LIMIT_EXCEEDED: data.error,
         };
         setError(codeMessages[data.code] || data.error || '创建订单失败');
         return;
@@ -349,6 +352,9 @@ function PayContent() {
                   <ul className={['mt-2 space-y-1 text-sm', isDark ? 'text-slate-300' : 'text-slate-600'].join(' ')}>
                     <li>订单完成后会自动到账</li>
                     <li>如需历史记录请查看"我的订单"</li>
+                    {config.maxDailyAmount > 0 && (
+                      <li>每日最大充值 ¥{config.maxDailyAmount.toFixed(2)}</li>
+                    )}
                     {!hasToken && <li className={isDark ? 'text-amber-200' : 'text-amber-700'}>当前链接无 token，订单查询受限</li>}
                   </ul>
                 </div>

@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
         enabledPaymentTypes: env.ENABLED_PAYMENT_TYPES,
         minAmount: env.MIN_RECHARGE_AMOUNT,
         maxAmount: env.MAX_RECHARGE_AMOUNT,
+        maxDailyAmount: env.MAX_DAILY_RECHARGE_AMOUNT,
       },
     });
   } catch (error) {

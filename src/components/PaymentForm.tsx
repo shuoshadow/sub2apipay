@@ -143,7 +143,7 @@ export default function PaymentForm({
           充值金额
         </label>
         <div className="grid grid-cols-3 gap-2">
-          {QUICK_AMOUNTS.map((val) => (
+          {QUICK_AMOUNTS.filter((val) => val <= maxAmount).map((val) => (
             <button
               key={val}
               type="button"
@@ -192,13 +192,19 @@ export default function PaymentForm({
         </div>
       </div>
 
-      {customAmount !== '' && !isValid && (
-        <div className={['text-xs', dark ? 'text-amber-300' : 'text-amber-700'].join(' ')}>
-          {
-            '\u91D1\u989D\u9700\u5728\u8303\u56F4\u5185\uFF0C\u4E14\u6700\u591A\u652F\u6301 2 \u4F4D\u5C0F\u6570\uFF08\u7CBE\u786E\u5230\u5206\uFF09'
-          }
-        </div>
-      )}
+      {customAmount !== '' && !isValid && (() => {
+        const num = parseFloat(customAmount);
+        let msg = '金额需在范围内，且最多支持 2 位小数（精确到分）';
+        if (!isNaN(num)) {
+          if (num < minAmount) msg = `单笔最低充值 ¥${minAmount}`;
+          else if (num > maxAmount) msg = `单笔最高充值 ¥${maxAmount}`;
+        }
+        return (
+          <div className={['text-xs', dark ? 'text-amber-300' : 'text-amber-700'].join(' ')}>
+            {msg}
+          </div>
+        );
+      })()}
 
       {/* Payment Type */}
       <div>
