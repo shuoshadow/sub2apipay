@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
       clientIp,
     });
 
-    return NextResponse.json(result);
+    // 不向客户端暴露 userName / userBalance 等隐私字段
+    const { userName: _u, userBalance: _b, ...safeResult } = result;
+    return NextResponse.json(safeResult);
   } catch (error) {
     if (error instanceof OrderError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: error.statusCode });

@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       user: {
         id: user.id,
-        username: user.username,
-        email: user.email,
         status: user.status,
-        balance: user.balance,
       },
       config: {
         enabledPaymentTypes: env.ENABLED_PAYMENT_TYPES,

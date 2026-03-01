@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 
 interface PaymentQRCodeProps {
   orderId: string;
+  token?: string;
   payUrl?: string | null;
   qrCode?: string | null;
   checkoutUrl?: string | null;
@@ -35,6 +36,7 @@ function isSafeCheckoutUrl(url: string): boolean {
 
 export default function PaymentQRCode({
   orderId,
+  token,
   payUrl,
   qrCode,
   checkoutUrl,
@@ -135,12 +137,13 @@ export default function PaymentQRCode({
   }, [pollStatus, expired]);
 
   const handleCancel = async () => {
+    if (!token) return;
     try {
+      // 先检查当前订单状态
       const res = await fetch(`/api/orders/${orderId}`);
       if (!res.ok) return;
       const data = await res.json();
 
-      // If the order already reached a terminal status, handle it immediately
       if (TERMINAL_STATUSES.has(data.status)) {
         onStatusChange(data.status);
         return;
@@ -149,7 +152,7 @@ export default function PaymentQRCode({
       const cancelRes = await fetch(`/api/orders/${orderId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: data.user_id }),
+        body: JSON.stringify({ token }),
       });
       if (cancelRes.ok) {
         const cancelData = await cancelRes.json();
@@ -159,7 +162,6 @@ export default function PaymentQRCode({
         }
         onStatusChange('CANCELLED');
       } else {
-        // Cancel failed (e.g. order was paid between the two requests) — re-check status
         await pollStatus();
       }
     } catch {
@@ -300,7 +302,7 @@ export default function PaymentQRCode({
         >
           {TEXT_BACK}
         </button>
-        {!expired && (
+        {!expired && token && (
           <button
             onClick={handleCancel}
             className="flex-1 rounded-lg border border-red-300 py-2 text-sm text-red-600 hover:bg-red-50"

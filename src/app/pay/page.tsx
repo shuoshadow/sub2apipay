@@ -47,7 +47,7 @@ function PayContent() {
   const [myOrders, setMyOrders] = useState<MyOrder[]>([]);
   const [activeMobileTab, setActiveMobileTab] = useState<'pay' | 'orders'>('pay');
 
-  const [config] = useState<AppConfig>({
+  const [config, setConfig] = useState<AppConfig>({
     enabledPaymentTypes: ['alipay', 'wxpay', 'stripe'],
     minAmount: 1,
     maxAmount: 10000,
@@ -80,6 +80,16 @@ function PayContent() {
     if (!userId || Number.isNaN(userId) || userId <= 0) return;
 
     try {
+      // 始终获取服务端配置（不含隐私信息）
+      const cfgRes = await fetch(`/api/user?user_id=${userId}`);
+      if (cfgRes.ok) {
+        const cfgData = await cfgRes.json();
+        if (cfgData.config) {
+          setConfig(cfgData.config);
+        }
+      }
+
+      // 有 token 时才尝试获取用户详情和订单
       if (token) {
         const meRes = await fetch(`/api/orders/my?token=${encodeURIComponent(token)}`);
         if (meRes.ok) {
@@ -108,19 +118,8 @@ function PayContent() {
         }
       }
 
-      const res = await fetch(`/api/users/${userId}`);
-      if (!res.ok) return;
-
-      const data = await res.json();
-      setUserInfo({
-        id: userId,
-        username:
-          (typeof data.displayName === 'string' && data.displayName.trim()) ||
-          (typeof data.username === 'string' && data.username.trim()) ||
-          (typeof data.email === 'string' && data.email.trim()) ||
-          `用户 #${userId}`,
-        balance: typeof data.balance === 'number' ? data.balance : 0,
-      });
+      // 无 token 或 token 失效：只显示用户 ID，不展示隐私信息
+      setUserInfo({ id: userId, username: `用户 #${userId}`, balance: 0 });
       setMyOrders([]);
     } catch {
       // ignore and keep page usable
@@ -175,7 +174,12 @@ function PayContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || '创建订单失败');
+        const codeMessages: Record<string, string> = {
+          USER_INACTIVE: '账户已被禁用，无法充值，请联系管理员',
+          TOO_MANY_PENDING: '您有过多待支付订单，请先完成或取消现有订单后再试',
+          USER_NOT_FOUND: '用户不存在，请检查链接是否正确',
+        };
+        setError(codeMessages[data.code] || data.error || '创建订单失败');
         return;
       }
 
@@ -189,16 +193,6 @@ function PayContent() {
         checkoutUrl: data.checkoutUrl,
         expiresAt: data.expiresAt,
       });
-
-      if (data.userName || typeof data.userBalance === 'number') {
-        setUserInfo((prev) => ({
-          username:
-            (typeof data.userName === 'string' && data.userName.trim()) ||
-            prev?.username ||
-            `用户 #${effectiveUserId}`,
-          balance: typeof data.userBalance === 'number' ? data.userBalance : (prev?.balance ?? 0),
-        }));
-      }
 
       setStep('paying');
     } catch {
@@ -385,6 +379,7 @@ function PayContent() {
       {step === 'paying' && orderResult && (
         <PaymentQRCode
           orderId={orderResult.orderId}
+          token={token || undefined}
           payUrl={orderResult.payUrl}
           qrCode={orderResult.qrCode}
           checkoutUrl={orderResult.checkoutUrl}

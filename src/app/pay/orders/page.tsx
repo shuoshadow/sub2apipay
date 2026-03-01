@@ -64,19 +64,7 @@ function OrdersContent() {
       }
 
       if (!hasToken) {
-        const res = await fetch(`/api/users/${userId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setUserInfo({
-            id: userId,
-            username:
-              (typeof data.displayName === 'string' && data.displayName.trim()) ||
-              (typeof data.username === 'string' && data.username.trim()) ||
-              (typeof data.email === 'string' && data.email.trim()) ||
-              `用户 #${userId}`,
-            balance: typeof data.balance === 'number' ? data.balance : 0,
-          });
-        }
+        setUserInfo({ id: userId, username: `用户 #${userId}`, balance: 0 });
         setOrders([]);
         setError('当前链接未携带登录 token，无法查询"我的订单"。');
         return;
@@ -185,7 +173,7 @@ function OrdersContent() {
             type="button"
             onClick={loadOrders}
             className={[
-              'rounded-lg border px-3 py-2 text-xs font-medium',
+              'inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
               isDark
                 ? 'border-slate-600 text-slate-200 hover:bg-slate-800'
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100',
@@ -196,7 +184,7 @@ function OrdersContent() {
           <a
             href={payUrl}
             className={[
-              'rounded-lg border px-3 py-2 text-xs font-medium',
+              'inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
               isDark
                 ? 'border-slate-600 text-slate-200 hover:bg-slate-800'
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100',
