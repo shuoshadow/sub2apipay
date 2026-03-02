@@ -31,6 +31,8 @@ interface AdminOrderDetail extends AdminOrder {
   failedAt: string | null;
   updatedAt: string;
   clientIp: string | null;
+  srcHost: string | null;
+  srcUrl: string | null;
   paymentSuccess?: boolean;
   rechargeSuccess?: boolean;
   rechargeStatus?: string;

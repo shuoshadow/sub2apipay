@@ -7,6 +7,8 @@ const createOrderSchema = z.object({
   user_id: z.number().int().positive(),
   amount: z.number().positive(),
   payment_type: z.enum(['alipay', 'wxpay', 'stripe']),
+  src_host: z.string().optional(),
+  src_url: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '参数错误', details: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { user_id, amount, payment_type } = parsed.data;
+    const { user_id, amount, payment_type, src_host, src_url } = parsed.data;
 
     // Validate amount range
     if (amount < env.MIN_RECHARGE_AMOUNT || amount > env.MAX_RECHARGE_AMOUNT) {
@@ -42,6 +44,8 @@ export async function POST(request: NextRequest) {
       amount,
       paymentType: payment_type,
       clientIp,
+      srcHost: src_host,
+      srcUrl: src_url,
     });
 
     // 不向客户端暴露 userName / userBalance 等隐私字段

@@ -15,6 +15,8 @@ export interface CreateOrderInput {
   amount: number;
   paymentType: PaymentType;
   clientIp: string;
+  srcHost?: string;
+  srcUrl?: string;
 }
 
 export interface CreateOrderResult {
@@ -106,6 +108,8 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       paymentType: input.paymentType,
       expiresAt,
       clientIp: input.clientIp,
+      srcHost: input.srcHost || null,
+      srcUrl: input.srcUrl || null,
     },
   });
 

@@ -34,6 +34,8 @@ model Order {
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
   clientIp      String?     @map("client_ip")
+  srcHost       String?     @map("src_host")
+  srcUrl        String?     @map("src_url")
 
   auditLogs     AuditLog[]
 

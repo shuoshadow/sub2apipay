@@ -38,6 +38,8 @@ function PayContent() {
   const theme = searchParams.get('theme') === 'dark' ? 'dark' : 'light';
   const uiMode = searchParams.get('ui_mode') || 'standalone';
   const tab = searchParams.get('tab');
+  const srcHost = searchParams.get('src_host') || undefined;
+  const srcUrl = searchParams.get('src_url') || undefined;
   const isDark = theme === 'dark';
 
   const [isIframeContext, setIsIframeContext] = useState(true);
@@ -230,6 +232,8 @@ function PayContent() {
           user_id: effectiveUserId,
           amount,
           payment_type: paymentType,
+          src_host: srcHost,
+          src_url: srcUrl,
         }),
       });
 

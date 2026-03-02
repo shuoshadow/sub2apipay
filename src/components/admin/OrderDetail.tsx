@@ -31,6 +31,8 @@ interface OrderDetailProps {
     createdAt: string;
     updatedAt: string;
     clientIp: string | null;
+    srcHost: string | null;
+    srcUrl: string | null;
     paymentSuccess?: boolean;
     rechargeSuccess?: boolean;
     rechargeStatus?: string;
@@ -54,6 +56,8 @@ export default function OrderDetail({ order, onClose }: OrderDetailProps) {
     { label: '充值码', value: order.rechargeCode },
     { label: '支付单号', value: order.paymentTradeNo || '-' },
     { label: '客户端IP', value: order.clientIp || '-' },
+    { label: '来源域名', value: order.srcHost || '-' },
+    { label: '来源页面', value: order.srcUrl || '-' },
     { label: '创建时间', value: new Date(order.createdAt).toLocaleString('zh-CN') },
     { label: '过期时间', value: new Date(order.expiresAt).toLocaleString('zh-CN') },
     { label: '支付时间', value: order.paidAt ? new Date(order.paidAt).toLocaleString('zh-CN') : '-' },
